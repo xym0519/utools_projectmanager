@@ -6,7 +6,16 @@
       "code": "redmine",
       "explain": "Redmine服务",
       "cmds": [
-        "Redmine"
+        "Redmine",
+        "Red"
+      ]
+    },
+    {
+      "code": "jenkins",
+      "explain": "Jenkins服务",
+      "cmds": [
+        "Jenkins",
+        "Jen"
       ]
     }
   ]
