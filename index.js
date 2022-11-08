@@ -86,6 +86,16 @@ async function loadGitlabProjects(groupid) {
     }
 }
 
+function checkKeyword(key, name) {
+    if (!key) {
+        return true;
+    }
+    let keys = key.split(' ');
+    return keys.every(item => {
+        return name.toLowerCase().includes(item.toLowerCase());
+    });
+}
+
 window.exports = {
     redmine: {
         mode: 'list',
@@ -105,7 +115,7 @@ window.exports = {
                 if (redmineStatus.step === 'project') {
                     let list = [];
                     redmineStatus.projects.forEach(item => {
-                        if (item.name.toLowerCase().includes(searchWord) || item.identifier.toLowerCase().includes(searchWord)) {
+                        if (checkKeyword(searchWord, item.identifier) || checkKeyword(searchWord, item.name)) {
                             list.push({
                                 title: item.identifier,
                                 description: item.name,
@@ -194,7 +204,7 @@ window.exports = {
                 if (jenkinsStatus.step === 'project') {
                     let list = [];
                     jenkinsStatus.jobs.forEach(item => {
-                        if (item.name.toLowerCase().includes(searchWord)) {
+                        if (checkKeyword(searchWord, item.name)) {
                             list.push({
                                 title: item.name,
                                 description: '请选择项目',
@@ -269,7 +279,7 @@ window.exports = {
                 let list = [];
                 if (gitlabStatus.step === 'group') {
                     gitlabStatus.groups.forEach(item => {
-                        if (item.name.toLowerCase().includes(searchWord) || item.full_name.toLowerCase().includes(searchWord)) {
+                        if (checkKeyword(searchWord, item.name) || checkKeyword(searchWord, item.full_name)) {
                             list.push({
                                 title: item.name,
                                 description: '请选择分组',
@@ -279,7 +289,7 @@ window.exports = {
                     });
                 } else if (gitlabStatus.step === 'project') {
                     gitlabStatus.projects.forEach(item => {
-                        if (item.title.toLowerCase().includes(searchWord) || item.type.toLowerCase().includes(searchWord)) {
+                        if (checkKeyword(searchWord, item.title) || checkKeyword(searchWord, item.type)) {
                             list.push(item);
                         }
                     });
