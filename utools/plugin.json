@@ -4,9 +4,9 @@
   "features": [
     {
       "code": "redmine",
-      "explain": "添加Redmine任务",
+      "explain": "Redmine服务",
       "cmds": [
-        "AddRedmine"
+        "Redmine"
       ]
     }
   ]
