@@ -1,0 +1,13 @@
+{
+  "preload": "preload.js",
+  "logo": "logo.png",
+  "features": [
+    {
+      "code": "redmine",
+      "explain": "添加Redmine任务",
+      "cmds": [
+        "AddRedmine"
+      ]
+    }
+  ]
+}
