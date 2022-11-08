@@ -17,6 +17,14 @@
         "Jenkins",
         "Jen"
       ]
+    },
+    {
+      "code": "gitlab",
+      "explain": "Gitlab服务",
+      "cmds": [
+        "Gitlab",
+        "Git"
+      ]
     }
   ]
 }

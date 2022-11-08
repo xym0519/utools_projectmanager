@@ -1,18 +1,26 @@
 RedmineKey = 'e933a9f1e721597802d289bebd87fb75830e867b';
 JenkinsUsername = '360cbs';
-JenkinsPassword = '11597ffad1372d9dab6a3ac0e6221b7a4f';
+JenkinsKey = '11597ffad1372d9dab6a3ac0e6221b7a4f';
+GitlabKey = 'yn39JxdtSuBfMssQhS1N';
 
 redmineStatus = {
     step: 'project',
-    projects: null,
+    projects: [],
     selected: null,
     question: ''
 };
 
 jenkinsStatus = {
     step: 'project',
-    jobs: null,
+    jobs: [],
     selected: null
+};
+
+gitlabStatus = {
+    step: 'group',
+    groups: [],
+    selected: null,
+    projects: []
 };
 
 async function initRedmine() {
@@ -39,9 +47,43 @@ async function initJenkins() {
 
 function getJenkinsHeaders() {
     let headers = new Headers();
-    headers.append('Authorization', 'Basic ' + new Buffer(JenkinsUsername + ":" + JenkinsPassword).toString('base64'));
-    let a = new Buffer(JenkinsUsername + ":" + JenkinsPassword).toString('base64');
+    headers.append('Authorization', 'Basic ' + new Buffer(JenkinsUsername + ":" + JenkinsKey).toString('base64'));
     return headers;
+}
+
+async function initGitlab() {
+    let page = 1;
+    while (true) {
+        let list = await initGitlabPage(page);
+        if (list.length > 0) {
+            gitlabStatus.groups.push(...list);
+            page++;
+        } else {
+            break;
+        }
+    }
+}
+
+async function initGitlabPage(page) {
+    let response = await fetch('http://gitlab.project.360cbs.com:8090/api/v4/groups?order_by=name&sort=asc&per_page=100&page=' + page + '&private_token=' + GitlabKey);
+    if (response.ok) {
+        return await response.json();
+    } else {
+        window.utools.showNotification('获取分组列表失败');
+        window.utools.hideMainWindow();
+        window.utools.outPlugin();
+    }
+}
+
+async function loadGitlabProjects(groupid) {
+    let response = await fetch('http://gitlab.project.360cbs.com:8090/api/v4/groups/' + groupid + '/projects?order_by=name&sort=asc&per_page=100&private_token=' + GitlabKey);
+    if (response.ok) {
+        return await response.json();
+    } else {
+        window.utools.showNotification('获取分组列表失败');
+        window.utools.hideMainWindow();
+        window.utools.outPlugin();
+    }
 }
 
 window.exports = {
@@ -49,12 +91,18 @@ window.exports = {
         mode: 'list',
         args: {
             placeholder: '请输入...',
+            enter: () => {
+                redmineStatus = {
+                    step: 'project',
+                    projects: [],
+                    selected: null,
+                    question: ''
+                };
+                initRedmine();
+            },
             search: async (action, searchWord, callbackSetList) => {
                 searchWord = searchWord.trim().toLowerCase();
                 if (redmineStatus.step === 'project') {
-                    if (redmineStatus.projects === null) {
-                        await initRedmine();
-                    }
                     let list = [];
                     redmineStatus.projects.forEach(item => {
                         if (item.name.toLowerCase().includes(searchWord) || item.identifier.toLowerCase().includes(searchWord)) {
@@ -133,12 +181,17 @@ window.exports = {
         mode: 'list',
         args: {
             placeholder: '请输入...',
+            enter: () => {
+                jenkinsStatus = {
+                    step: 'project',
+                    jobs: [],
+                    selected: null
+                };
+                initJenkins();
+            },
             search: async (action, searchWord, callbackSetList) => {
                 searchWord = searchWord.trim().toLowerCase();
                 if (jenkinsStatus.step === 'project') {
-                    if (jenkinsStatus.jobs === null) {
-                        await initJenkins();
-                    }
                     let list = [];
                     jenkinsStatus.jobs.forEach(item => {
                         if (item.name.toLowerCase().includes(searchWord)) {
@@ -193,6 +246,76 @@ window.exports = {
                         window.utools.hideMainWindow();
                         window.utools.outPlugin();
                     }
+                }
+
+            }
+        }
+    },
+    gitlab: {
+        mode: 'list',
+        args: {
+            placeholder: '请输入...',
+            enter: () => {
+                gitlabStatus = {
+                    step: 'group',
+                    groups: [],
+                    selected: null,
+                    projects: []
+                };
+                initGitlab();
+            },
+            search: async (action, searchWord, callbackSetList) => {
+                searchWord = searchWord.trim().toLowerCase();
+                let list = [];
+                if (gitlabStatus.step === 'group') {
+                    gitlabStatus.groups.forEach(item => {
+                        if (item.name.toLowerCase().includes(searchWord) || item.full_name.toLowerCase().includes(searchWord)) {
+                            list.push({
+                                title: item.name,
+                                description: '请选择分组',
+                                data: item
+                            });
+                        }
+                    });
+                } else if (gitlabStatus.step === 'project') {
+                    gitlabStatus.projects.forEach(item => {
+                        if (item.title.toLowerCase().includes(searchWord) || item.type.toLowerCase().includes(searchWord)) {
+                            list.push(item);
+                        }
+                    });
+                }
+                callbackSetList(list)
+            },
+            select: async (action, item, callbackSetList) => {
+                if (gitlabStatus.step === 'group') {
+                    gitlabStatus.step = 'project';
+                    gitlabStatus.selected = item.data;
+                    gitlabStatus.projects = [
+                        {
+                            title: '打开分组',
+                            description: gitlabStatus.selected.name,
+                            web_url: gitlabStatus.selected.web_url,
+                            type: 'group'
+                        }
+                    ];
+                    let projects = await loadGitlabProjects(item.data.id);
+                    projects.forEach(project => {
+                        gitlabStatus.projects.push({
+                            title: project.name,
+                            description: gitlabStatus.selected.name,
+                            web_url: project.web_url,
+                            type: 'project'
+                        });
+                    });
+                    callbackSetList(gitlabStatus.projects)
+                    utools.setSubInputValue('');
+                    // utools.subInputBlur();
+                    // utools.removeSubInput();
+                    utools.subInputFocus();
+                } else if (gitlabStatus.step === 'project') {
+                    utools.shellOpenExternal(item.web_url);
+                    window.utools.hideMainWindow();
+                    window.utools.outPlugin();
                 }
 
             }
