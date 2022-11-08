@@ -238,7 +238,7 @@ window.exports = {
                     // utools.subInputFocus();
                 } else if (jenkinsStatus.step === 'action') {
                     if (item.action === 'build') {
-                        window.fetch('http://jenkins.project.360cbs.com:8090/job/' + jenkinsStatus.selected.name + '/build', {
+                        window.fetch('http://jenkins.project.360cbs.com:8090/job/' + jenkinsStatus.selected.name + '/build?delay=0', {
                             method: 'post',
                             headers: getJenkinsHeaders()
                         }).then(response => {
