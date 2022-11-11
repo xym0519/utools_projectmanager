@@ -11,6 +11,13 @@
       ]
     },
     {
+      "code": "redminesetting",
+      "explain": "Redmine设置",
+      "cmds": [
+        "RedmineSetting"
+      ]
+    },
+    {
       "code": "jenkins",
       "explain": "Jenkins服务",
       "cmds": [
@@ -19,11 +26,25 @@
       ]
     },
     {
+      "code": "jenkinssetting",
+      "explain": "Jenkins设置",
+      "cmds": [
+        "JenkinsSetting"
+      ]
+    },
+    {
       "code": "gitlab",
       "explain": "Gitlab服务",
       "cmds": [
         "Gitlab",
         "Git"
+      ]
+    },
+    {
+      "code": "gitlabsetting",
+      "explain": "Gitlab设置",
+      "cmds": [
+        "GitlabSetting"
       ]
     }
   ]

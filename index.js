@@ -1,8 +1,3 @@
-RedmineKey = 'e933a9f1e721597802d289bebd87fb75830e867b';
-JenkinsUsername = '360cbs';
-JenkinsKey = '11597ffad1372d9dab6a3ac0e6221b7a4f';
-GitlabKey = 'yn39JxdtSuBfMssQhS1N';
-
 redmineStatus = {
     step: 'project',
     projects: [],
@@ -23,8 +18,29 @@ gitlabStatus = {
     projects: []
 };
 
+function getRedmineKey() {
+    let item = utools.db.get('redminekey');
+    return item ? item.key : '';
+}
+
+function getJenkinsKey() {
+    let item = utools.db.get('jenkinskey');
+    let key = item ? item.key : '';
+    let keys = key.split('/');
+    if (keys.length === 2) {
+        return keys;
+    } else {
+        return ['', ''];
+    }
+}
+
+function getGitlabKey() {
+    let item = utools.db.get('gitlabkey');
+    return item ? item.key : '';
+}
+
 async function initRedmine() {
-    let response = await fetch('http://redmine.project.360cbs.com:8090/projects.json?key=' + RedmineKey);
+    let response = await fetch('http://redmine.project.360cbs.com:8090/projects.json?key=' + getRedmineKey());
     if (response.ok) {
         redmineStatus.projects = (await response.json()).projects;
     } else {
@@ -47,7 +63,8 @@ async function initJenkins() {
 
 function getJenkinsHeaders() {
     let headers = new Headers();
-    headers.append('Authorization', 'Basic ' + new Buffer(JenkinsUsername + ":" + JenkinsKey).toString('base64'));
+    let keys = getJenkinsKey();
+    headers.append('Authorization', 'Basic ' + new Buffer(keys[0] + ":" + keys[1]).toString('base64'));
     return headers;
 }
 
@@ -65,7 +82,7 @@ async function initGitlab() {
 }
 
 async function initGitlabPage(page) {
-    let response = await fetch('http://gitlab.project.360cbs.com:8090/api/v4/groups?order_by=name&sort=asc&per_page=100&page=' + page + '&private_token=' + GitlabKey);
+    let response = await fetch('http://gitlab.project.360cbs.com:8090/api/v4/groups?order_by=name&sort=asc&per_page=100&page=' + page + '&private_token=' + getGitlabKey());
     if (response.ok) {
         return await response.json();
     } else {
@@ -76,7 +93,7 @@ async function initGitlabPage(page) {
 }
 
 async function loadGitlabProjects(groupid) {
-    let response = await fetch('http://gitlab.project.360cbs.com:8090/api/v4/groups/' + groupid + '/projects?order_by=name&sort=asc&per_page=100&private_token=' + GitlabKey);
+    let response = await fetch('http://gitlab.project.360cbs.com:8090/api/v4/groups/' + groupid + '/projects?order_by=name&sort=asc&per_page=100&private_token=' + getGitlabKey());
     if (response.ok) {
         return await response.json();
     } else {
@@ -162,7 +179,7 @@ window.exports = {
                                 status_id: 1
                             }
                         };
-                        window.fetch('http://redmine.project.360cbs.com:8090/issues.json?key=' + RedmineKey, {
+                        window.fetch('http://redmine.project.360cbs.com:8090/issues.json?key=' + getRedmineKey(), {
                             method: 'post',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -328,6 +345,114 @@ window.exports = {
                     window.utools.outPlugin();
                 }
 
+            }
+        }
+    },
+    jenkinssetting: {
+        mode: 'list',
+        args: {
+            placeholder: '请输入...',
+            enter: (action, callbackSetList) => {
+                let item = utools.db.get('jenkinskey');
+                if (!item) {
+                    item = {_id: 'jenkinskey', key: ''};
+                }
+                callbackSetList([{
+                    title: item ? item.key : '',
+                    description: '请修改后保存',
+                    data: item
+                }]);
+            },
+            search: async (action, searchWord, callbackSetList) => {
+                let item = utools.db.get('jenkinskey');
+                if (!item) {
+                    item = {_id: 'jenkinskey', key: searchWord};
+                } else {
+                    item.key = searchWord;
+                }
+                callbackSetList([{
+                    title: 'Jenkins Key Setting',
+                    description: '请输入后保存',
+                    data: item
+                }]);
+            },
+            select: async (action, item) => {
+                utools.db.put(item.data);
+                console.log(item)
+                window.utools.hideMainWindow();
+                window.utools.outPlugin();
+            }
+        }
+    },
+    redminesetting: {
+        mode: 'list',
+        args: {
+            placeholder: '请输入...',
+            enter: (action, callbackSetList) => {
+                let item = utools.db.get('redminekey');
+                if (!item) {
+                    item = {_id: 'redminekey', key: ''};
+                }
+                callbackSetList([{
+                    title: item ? item.key : '',
+                    description: '请修改后保存',
+                    data: item
+                }]);
+            },
+            search: async (action, searchWord, callbackSetList) => {
+                let item = utools.db.get('redminekey');
+                if (!item) {
+                    item = {_id: 'redminekey', key: searchWord};
+                } else {
+                    item.key = searchWord;
+                }
+                callbackSetList([{
+                    title: 'Redmine Key Setting',
+                    description: '请输入后保存',
+                    data: item
+                }]);
+            },
+            select: async (action, item) => {
+                utools.db.put(item.data);
+                console.log(item)
+                window.utools.hideMainWindow();
+                window.utools.outPlugin();
+            }
+        }
+    },
+    gitlabsetting: {
+        mode: 'list',
+        args: {
+            placeholder: '请输入...',
+            enter: (action, callbackSetList) => {
+                let item = utools.db.get('gitlabkey');
+                if (!item) {
+                    item = {_id: 'gitlabkey', key: ''};
+                }
+                callbackSetList([{
+                    title: item ? item.key : '',
+                    description: '请修改后保存',
+                    data: item
+                }]);
+            },
+            search: async (action, searchWord, callbackSetList) => {
+                let item = utools.db.get('gitlabkey');
+                if (!item) {
+                    item = {_id: 'gitlabkey', key: searchWord};
+                } else {
+                    item.key = searchWord;
+                }
+                callbackSetList([{
+                    title: 'Gitlab Key Setting',
+                    description: '请输入后保存',
+                    data: item
+                }]);
+            },
+            select: async (action, item) => {
+                utools.db.put(item.data);
+                console.log(item)
+                window.utools.hideMainWindow();
+                window.utools.outPlugin();
             }
         }
     }
