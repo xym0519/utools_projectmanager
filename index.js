@@ -237,14 +237,14 @@ window.exports = {
                     jenkinsStatus.selected = item.data;
                     let list = [
                         {
-                            title: '打开任务',
-                            description: jenkinsStatus.selected.name,
-                            action: 'open'
-                        },
-                        {
                             title: '构建任务',
                             description: jenkinsStatus.selected.name,
                             action: 'build'
+                        },
+                        {
+                            title: '打开任务',
+                            description: jenkinsStatus.selected.name,
+                            action: 'open'
                         },
                         {
                             title: '构建并打开',
