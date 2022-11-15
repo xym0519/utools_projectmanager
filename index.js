@@ -200,7 +200,6 @@ window.exports = {
                         window.utools.outPlugin();
                     }
                 }
-
             }
         }
     },
@@ -246,6 +245,11 @@ window.exports = {
                             title: '构建任务',
                             description: jenkinsStatus.selected.name,
                             action: 'build'
+                        },
+                        {
+                            title: '构建并打开',
+                            description: jenkinsStatus.selected.name,
+                            action: 'buildopen'
                         }
                     ];
                     callbackSetList(list);
@@ -255,6 +259,19 @@ window.exports = {
                     // utools.subInputFocus();
                 } else if (jenkinsStatus.step === 'action') {
                     if (item.action === 'build') {
+                        window.fetch('http://jenkins.project.360cbs.com:8090/job/' + jenkinsStatus.selected.name + '/build?delay=0', {
+                            method: 'post',
+                            headers: getJenkinsHeaders()
+                        }).then(response => {
+                            if (response.ok) {
+                                window.utools.showNotification('构建成功');
+                                window.utools.hideMainWindow();
+                                window.utools.outPlugin();
+                            } else {
+                                window.utools.showNotification('构建失败');
+                            }
+                        });
+                    } else if (item.action === 'buildopen') {
                         window.fetch('http://jenkins.project.360cbs.com:8090/job/' + jenkinsStatus.selected.name + '/build?delay=0', {
                             method: 'post',
                             headers: getJenkinsHeaders()
@@ -274,7 +291,6 @@ window.exports = {
                         window.utools.outPlugin();
                     }
                 }
-
             }
         }
     },
@@ -344,7 +360,6 @@ window.exports = {
                     window.utools.hideMainWindow();
                     window.utools.outPlugin();
                 }
-
             }
         }
     },
