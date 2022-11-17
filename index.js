@@ -40,9 +40,24 @@ function getGitlabKey() {
 }
 
 async function initRedmine() {
-    let response = await fetch('http://redmine.project.360cbs.com:8090/projects.json?key=' + getRedmineKey());
+    let page = 0;
+    while (true) {
+        let res = await initRedminePage(page);
+        let list = res.projects;
+        if (list.length > 0) {
+            redmineStatus.projects.push(...list);
+            page++;
+        } else {
+            break;
+        }
+    }
+}
+
+async function initRedminePage(page) {
+    let offset = page * 100;
+    let response = await fetch('http://redmine.project.360cbs.com:8090/projects.json?limit=100&offset=' + offset + '&key=' + getRedmineKey());
     if (response.ok) {
-        redmineStatus.projects = (await response.json()).projects;
+        return await response.json();
     } else {
         window.utools.showNotification('获取项目列表失败');
         window.utools.hideMainWindow();
