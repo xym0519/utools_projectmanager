@@ -1,3 +1,6 @@
+const GitlabHost = 'http://gitlab.project.360cbs.com:8090';
+const RedmineHost = 'http://redmine.project.360cbs.com:8090';
+const JenkinsHost = 'http://jenkins.project.360cbs.com:8090';
 redmineStatus = {
     step: 'project',
     projects: [],
@@ -55,7 +58,7 @@ async function initRedmine() {
 
 async function initRedminePage(page) {
     let offset = page * 100;
-    let response = await fetch('http://redmine.project.360cbs.com:8090/projects.json?limit=100&offset=' + offset + '&key=' + getRedmineKey());
+    let response = await fetch(RedmineHost + '/projects.json?limit=100&offset=' + offset + '&key=' + getRedmineKey());
     if (response.ok) {
         return await response.json();
     } else {
@@ -66,7 +69,7 @@ async function initRedminePage(page) {
 }
 
 async function initJenkins() {
-    let response = await fetch('http://jenkins.project.360cbs.com:8090/api/json?tree=jobs[name]', {headers: getJenkinsHeaders()});
+    let response = await fetch(JenkinsHost + '/api/json?tree=jobs[name]', {headers: getJenkinsHeaders()});
     if (response.ok) {
         jenkinsStatus.jobs = (await response.json()).jobs;
     } else {
@@ -97,7 +100,7 @@ async function initGitlab() {
 }
 
 async function initGitlabPage(page) {
-    let response = await fetch('http://gitlab.project.360cbs.com:8090/api/v4/groups?order_by=name&sort=asc&per_page=100&page=' + page + '&private_token=' + getGitlabKey());
+    let response = await fetch(GitlabHost + '/api/v4/groups?order_by=name&sort=asc&per_page=100&page=' + page + '&private_token=' + getGitlabKey());
     if (response.ok) {
         return await response.json();
     } else {
@@ -108,7 +111,7 @@ async function initGitlabPage(page) {
 }
 
 async function loadGitlabProjects(groupid) {
-    let response = await fetch('http://gitlab.project.360cbs.com:8090/api/v4/groups/' + groupid + '/projects?order_by=name&sort=asc&per_page=100&private_token=' + getGitlabKey());
+    let response = await fetch(GitlabHost + '/api/v4/groups/' + groupid + '/projects?order_by=name&sort=asc&per_page=100&private_token=' + getGitlabKey());
     if (response.ok) {
         return await response.json();
     } else {
@@ -194,7 +197,7 @@ window.exports = {
                                 status_id: 1
                             }
                         };
-                        window.fetch('http://redmine.project.360cbs.com:8090/issues.json?key=' + getRedmineKey(), {
+                        window.fetch(RedmineHost + '/issues.json?key=' + getRedmineKey(), {
                             method: 'post',
                             headers: {
                                 'Content-Type': 'application/json'
@@ -210,7 +213,7 @@ window.exports = {
                             }
                         });
                     } else if (item.action === 'open') {
-                        utools.shellOpenExternal('http://redmine.project.360cbs.com:8090/projects/' + redmineStatus.selected.identifier + '/issues');
+                        utools.shellOpenExternal(RedmineHost + '/projects/' + redmineStatus.selected.identifier + '/issues');
                         window.utools.hideMainWindow();
                         window.utools.outPlugin();
                     }
@@ -274,7 +277,7 @@ window.exports = {
                     // utools.subInputFocus();
                 } else if (jenkinsStatus.step === 'action') {
                     if (item.action === 'build') {
-                        window.fetch('http://jenkins.project.360cbs.com:8090/job/' + jenkinsStatus.selected.name + '/build?delay=0', {
+                        window.fetch(JenkinsHost + '/job/' + jenkinsStatus.selected.name + '/build?delay=0', {
                             method: 'post',
                             headers: getJenkinsHeaders()
                         }).then(response => {
@@ -287,12 +290,12 @@ window.exports = {
                             }
                         });
                     } else if (item.action === 'buildopen') {
-                        window.fetch('http://jenkins.project.360cbs.com:8090/job/' + jenkinsStatus.selected.name + '/build?delay=0', {
+                        window.fetch(JenkinsHost + '/job/' + jenkinsStatus.selected.name + '/build?delay=0', {
                             method: 'post',
                             headers: getJenkinsHeaders()
                         }).then(response => {
                             if (response.ok) {
-                                utools.shellOpenExternal('http://jenkins.project.360cbs.com:8090/job/' + jenkinsStatus.selected.name + '/');
+                                utools.shellOpenExternal(JenkinsHost + '/job/' + jenkinsStatus.selected.name + '/');
                                 window.utools.showNotification('构建成功');
                                 window.utools.hideMainWindow();
                                 window.utools.outPlugin();
@@ -301,7 +304,7 @@ window.exports = {
                             }
                         });
                     } else if (item.action === 'open') {
-                        utools.shellOpenExternal('http://jenkins.project.360cbs.com:8090/job/' + jenkinsStatus.selected.name + '/');
+                        utools.shellOpenExternal(JenkinsHost + '/job/' + jenkinsStatus.selected.name + '/');
                         window.utools.hideMainWindow();
                         window.utools.outPlugin();
                     }
@@ -352,7 +355,7 @@ window.exports = {
                         {
                             title: '打开分组',
                             description: gitlabStatus.selected.name,
-                            web_url: gitlabStatus.selected.web_url,
+                            web_url: GitlabHost + '/groups/' + gitlabStatus.selected.path,
                             type: 'group'
                         }
                     ];
@@ -361,7 +364,7 @@ window.exports = {
                         gitlabStatus.projects.push({
                             title: project.name,
                             description: gitlabStatus.selected.name,
-                            web_url: project.web_url,
+                            web_url: GitlabHost + '/' + gitlabStatus.selected.path + '/' + project.path,
                             type: 'project'
                         });
                     });
