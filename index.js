@@ -169,14 +169,14 @@ window.exports = {
                     redmineStatus.selected = item.data;
                     let list = [
                         {
-                            title: '输入问题后回车保存',
-                            description: redmineStatus.selected.name + '(' + redmineStatus.selected.identifier + ')',
-                            action: 'save'
-                        },
-                        {
                             title: '打开项目',
                             description: redmineStatus.selected.name + '(' + redmineStatus.selected.identifier + ')',
                             action: 'open'
+                        },
+                        {
+                            title: '输入问题后回车保存',
+                            description: redmineStatus.selected.name + '(' + redmineStatus.selected.identifier + ')',
+                            action: 'save'
                         }
                     ];
                     callbackSetList(list);
