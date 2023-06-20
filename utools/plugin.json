@@ -7,7 +7,7 @@
       "explain": "Redmine服务",
       "cmds": [
         "Redmine",
-        "Red"
+        "R"
       ]
     },
     {
@@ -22,7 +22,7 @@
       "explain": "Jenkins服务",
       "cmds": [
         "Jenkins",
-        "Jen"
+        "J"
       ]
     },
     {
@@ -37,7 +37,7 @@
       "explain": "Gitlab服务",
       "cmds": [
         "Gitlab",
-        "Git"
+        "G"
       ]
     },
     {

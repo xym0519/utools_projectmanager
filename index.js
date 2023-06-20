@@ -1,6 +1,5 @@
-const GitlabHost = 'http://gitlab.project.360cbs.com:8090';
+// region Redmine
 const RedmineHost = 'http://redmine.project.360cbs.com:8090';
-const JenkinsHost = 'http://jenkins.project.360cbs.com:8090';
 redmineStatus = {
     step: 'project',
     projects: [],
@@ -8,23 +7,57 @@ redmineStatus = {
     question: ''
 };
 
-jenkinsStatus = {
-    step: 'project',
-    jobs: [],
-    selected: null
-};
-
-gitlabStatus = {
-    step: 'group',
-    groups: [],
-    selected: null,
-    projects: []
-};
-
 function getRedmineKey() {
     let item = utools.db.get('redminekey');
     return item ? item.key : '';
 }
+
+function initRedmine() {
+    let cache = utools.db.get('redminecache')
+    redmineStatus.projects = JSON.parse(cache ? cache.key : '[]');
+    loadRedmineData();
+}
+
+async function loadRedmineData() {
+    let page = 0;
+    let projects = [];
+    while (true) {
+        let res = await loadRedminePage(page);
+        let list = res.projects;
+        if (list.length > 0) {
+            projects.push(...list);
+            page++;
+        } else {
+            break;
+        }
+    }
+    utools.db.put({_id: 'redminecache', key: JSON.stringify(projects)});
+    redmineStatus.projects = projects;
+}
+
+async function loadRedminePage(page) {
+    let offset = page * 100;
+    let response = await fetch(RedmineHost + '/projects.json?limit=100&offset=' + offset + '&key=' + getRedmineKey());
+    if (response.ok) {
+        return await response.json();
+    } else {
+        window.utools.showNotification('获取项目列表失败');
+        window.utools.hideMainWindow();
+        window.utools.outPlugin();
+    }
+}
+
+// endregion
+
+// region Jenkins
+const JenkinsHost = 'http://jenkins.project.360cbs.com:8090';
+jenkinsStatus = {
+    step: 'project',
+    jobs: [],
+    views: [],
+    selected: null,
+    selectedType: null
+};
 
 function getJenkinsKey() {
     let item = utools.db.get('jenkinskey');
@@ -37,41 +70,24 @@ function getJenkinsKey() {
     }
 }
 
-function getGitlabKey() {
-    let item = utools.db.get('gitlabkey');
-    return item ? item.key : '';
+function initJenkins() {
+    let cacheJobs = utools.db.get('jenkinscache_jobs')
+    let cacheViews = utools.db.get('jenkinscache_views')
+    jenkinsStatus.jobs = JSON.parse(cacheJobs ? cacheJobs.key : '[]');
+    jenkinsStatus.views = JSON.parse(cacheViews ? cacheViews.key : '[]');
+    loadJenkinsData();
 }
 
-async function initRedmine() {
-    let page = 0;
-    while (true) {
-        let res = await initRedminePage(page);
-        let list = res.projects;
-        if (list.length > 0) {
-            redmineStatus.projects.push(...list);
-            page++;
-        } else {
-            break;
-        }
-    }
-}
-
-async function initRedminePage(page) {
-    let offset = page * 100;
-    let response = await fetch(RedmineHost + '/projects.json?limit=100&offset=' + offset + '&key=' + getRedmineKey());
+async function loadJenkinsData() {
+    let response = await fetch(JenkinsHost + '/api/json?tree=jobs[name],views[name]', {headers: getJenkinsHeaders()});
     if (response.ok) {
-        return await response.json();
-    } else {
-        window.utools.showNotification('获取项目列表失败');
-        window.utools.hideMainWindow();
-        window.utools.outPlugin();
-    }
-}
-
-async function initJenkins() {
-    let response = await fetch(JenkinsHost + '/api/json?tree=jobs[name]', {headers: getJenkinsHeaders()});
-    if (response.ok) {
-        jenkinsStatus.jobs = (await response.json()).jobs;
+        let data = await response.json();
+        let jobs = data.jobs;
+        let views = data.views;
+        utools.db.put({_id: 'jenkinscache_jobs', key: JSON.stringify(jobs)});
+        utools.db.put({_id: 'jenkinscache_views', key: JSON.stringify(views)});
+        jenkinsStatus.jobs = jobs;
+        jenkinsStatus.views = views;
     } else {
         window.utools.showNotification('获取项目列表失败');
         window.utools.hideMainWindow();
@@ -86,20 +102,45 @@ function getJenkinsHeaders() {
     return headers;
 }
 
-async function initGitlab() {
+// endregion
+
+// region Gitlab
+const GitlabHost = 'http://gitlab.project.360cbs.com:8090';
+gitlabStatus = {
+    step: 'group',
+    groups: [],
+    selected: null,
+    projects: []
+};
+
+function getGitlabKey() {
+    let item = utools.db.get('gitlabkey');
+    return item ? item.key : '';
+}
+
+function initGitlab() {
+    let cache = utools.db.get('gitlabcache_groups')
+    gitlabStatus.groups = JSON.parse(cache ? cache.key : '[]');
+    loadGitlabGroupData();
+}
+
+async function loadGitlabGroupData() {
     let page = 1;
+    let groups = [];
     while (true) {
-        let list = await initGitlabPage(page);
+        let list = await loadGitlabPage(page);
         if (list.length > 0) {
-            gitlabStatus.groups.push(...list);
+            groups.push(...list);
             page++;
         } else {
             break;
         }
     }
+    utools.db.put({_id: 'gitlabcache_groups', key: JSON.stringify(groups)});
+    gitlabStatus.groups = groups;
 }
 
-async function initGitlabPage(page) {
+async function loadGitlabPage(page) {
     let response = await fetch(GitlabHost + '/api/v4/groups?order_by=name&sort=asc&per_page=100&page=' + page + '&private_token=' + getGitlabKey());
     if (response.ok) {
         return await response.json();
@@ -110,10 +151,18 @@ async function initGitlabPage(page) {
     }
 }
 
-async function loadGitlabProjects(groupid) {
+function getGitlabProjects(groupid) {
+    let cache = utools.db.get('gitlabcache_groups_' + groupid)
+    let data = JSON.parse(cache ? cache.key : '[]');
+    loadGitlabProjectData(groupid);
+    return data;
+}
+
+async function loadGitlabProjectData(groupid) {
     let response = await fetch(GitlabHost + '/api/v4/groups/' + groupid + '/projects?order_by=name&sort=asc&per_page=100&private_token=' + getGitlabKey());
     if (response.ok) {
-        return await response.json();
+        let projects = await response.json();
+        utools.db.put({_id: 'gitlabcache_groups_' + groupid, key: JSON.stringify(projects)});
     } else {
         window.utools.showNotification('获取分组列表失败');
         window.utools.hideMainWindow();
@@ -121,6 +170,9 @@ async function loadGitlabProjects(groupid) {
     }
 }
 
+// endregion
+
+// region Common
 function checkKeyword(key, name) {
     if (!key) {
         return true;
@@ -130,6 +182,8 @@ function checkKeyword(key, name) {
         return name.toLowerCase().includes(item.toLowerCase());
     });
 }
+
+// endregion
 
 window.exports = {
     redmine: {
@@ -240,9 +294,20 @@ window.exports = {
                     jenkinsStatus.jobs.forEach(item => {
                         if (checkKeyword(searchWord, item.name)) {
                             list.push({
-                                title: item.name,
+                                title: item.name + ' [Job]',
                                 description: '请选择项目',
-                                data: item
+                                data: item,
+                                itemType: 'job'
+                            });
+                        }
+                    });
+                    jenkinsStatus.views.forEach(item => {
+                        if (checkKeyword(searchWord, item.name)) {
+                            list.push({
+                                title: item.name + ' [View]',
+                                description: '请选择项目',
+                                data: item,
+                                itemType: 'view'
                             });
                         }
                     });
@@ -253,23 +318,35 @@ window.exports = {
                 if (jenkinsStatus.step === 'project') {
                     jenkinsStatus.step = 'action';
                     jenkinsStatus.selected = item.data;
-                    let list = [
-                        {
-                            title: '构建任务',
-                            description: jenkinsStatus.selected.name,
-                            action: 'build'
-                        },
-                        {
-                            title: '打开任务',
-                            description: jenkinsStatus.selected.name,
-                            action: 'open'
-                        },
-                        {
-                            title: '构建并打开',
-                            description: jenkinsStatus.selected.name,
-                            action: 'buildopen'
-                        }
-                    ];
+                    jenkinsStatus.selectedType = item.itemType
+                    let list = [];
+                    if (item.itemType === 'job') {
+                        list = [
+                            {
+                                title: '构建任务',
+                                description: jenkinsStatus.selected.name,
+                                action: 'build'
+                            },
+                            {
+                                title: '打开任务',
+                                description: jenkinsStatus.selected.name,
+                                action: 'open'
+                            },
+                            {
+                                title: '构建并打开',
+                                description: jenkinsStatus.selected.name,
+                                action: 'buildopen'
+                            }
+                        ];
+                    } else {
+                        list = [
+                            {
+                                title: '打开视图',
+                                description: jenkinsStatus.selected.name,
+                                action: 'openview'
+                            }
+                        ];
+                    }
                     callbackSetList(list);
                     utools.setSubInputValue(jenkinsStatus.selected.name);
                     utools.subInputBlur();
@@ -305,6 +382,10 @@ window.exports = {
                         });
                     } else if (item.action === 'open') {
                         utools.shellOpenExternal(JenkinsHost + '/job/' + jenkinsStatus.selected.name + '/');
+                        window.utools.hideMainWindow();
+                        window.utools.outPlugin();
+                    } else if (item.action === 'openview') {
+                        utools.shellOpenExternal(JenkinsHost + '/view/' + jenkinsStatus.selected.name + '/');
                         window.utools.hideMainWindow();
                         window.utools.outPlugin();
                     }
@@ -347,7 +428,7 @@ window.exports = {
                 }
                 callbackSetList(list)
             },
-            select: async (action, item, callbackSetList) => {
+            select: (action, item, callbackSetList) => {
                 if (gitlabStatus.step === 'group') {
                     gitlabStatus.step = 'project';
                     gitlabStatus.selected = item.data;
@@ -359,7 +440,7 @@ window.exports = {
                             type: 'group'
                         }
                     ];
-                    let projects = await loadGitlabProjects(item.data.id);
+                    let projects = getGitlabProjects(item.data.id);
                     projects.forEach(project => {
                         gitlabStatus.projects.push({
                             title: project.name,
