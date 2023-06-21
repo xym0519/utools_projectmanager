@@ -3,6 +3,7 @@
   "logo": "logo.png",
   "features": [
     {
+      "icon": "image/redmine.png",
       "code": "redmine",
       "explain": "Redmine服务",
       "cmds": [
@@ -11,6 +12,7 @@
       ]
     },
     {
+      "icon": "image/redmine.png",
       "code": "redminesetting",
       "explain": "Redmine设置",
       "cmds": [
@@ -18,6 +20,7 @@
       ]
     },
     {
+      "icon": "image/jenkins.png",
       "code": "jenkins",
       "explain": "Jenkins服务",
       "cmds": [
@@ -26,6 +29,7 @@
       ]
     },
     {
+      "icon": "image/jenkins.png",
       "code": "jenkinssetting",
       "explain": "Jenkins设置",
       "cmds": [
@@ -33,6 +37,7 @@
       ]
     },
     {
+      "icon": "image/gitlab.png",
       "code": "gitlab",
       "explain": "Gitlab服务",
       "cmds": [
@@ -41,6 +46,7 @@
       ]
     },
     {
+      "icon": "image/gitlab.png",
       "code": "gitlabsetting",
       "explain": "Gitlab设置",
       "cmds": [

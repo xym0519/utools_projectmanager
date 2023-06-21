@@ -1,5 +1,8 @@
 // region Redmine
 const RedmineHost = 'http://redmine.project.360cbs.com:8090';
+const RedmineDefaultTracker = 2;
+const RedmineDefaultAssignedTo = 3;
+const RedmineDefaultStatus = 1;
 redmineStatus = {
     step: 'project',
     projects: [],
@@ -206,6 +209,7 @@ window.exports = {
                     redmineStatus.projects.forEach(item => {
                         if (checkKeyword(searchWord, item.identifier) || checkKeyword(searchWord, item.name)) {
                             list.push({
+                                icon: 'image/redmine.png',
                                 title: item.identifier,
                                 description: item.name,
                                 data: item
@@ -246,9 +250,9 @@ window.exports = {
                             issue: {
                                 project_id: redmineStatus.selected.id,
                                 subject: redmineStatus.question,
-                                tracker_id: 6,
-                                assigned_to_id: 3,
-                                status_id: 1
+                                tracker_id: RedmineDefaultTracker,
+                                assigned_to_id: RedmineDefaultAssignedTo,
+                                status_id: RedmineDefaultStatus
                             }
                         };
                         window.fetch(RedmineHost + '/issues.json?key=' + getRedmineKey(), {
@@ -294,6 +298,7 @@ window.exports = {
                     jenkinsStatus.jobs.forEach(item => {
                         if (checkKeyword(searchWord, item.name)) {
                             list.push({
+                                icon: 'image/jenkins.png',
                                 title: item.name + ' [Job]',
                                 description: '请选择项目',
                                 data: item,
@@ -413,6 +418,7 @@ window.exports = {
                     gitlabStatus.groups.forEach(item => {
                         if (checkKeyword(searchWord, item.name) || checkKeyword(searchWord, item.full_name)) {
                             list.push({
+                                icon: 'image/gitlab.png',
                                 title: item.name,
                                 description: '请选择分组',
                                 data: item
@@ -443,6 +449,7 @@ window.exports = {
                     let projects = getGitlabProjects(item.data.id);
                     projects.forEach(project => {
                         gitlabStatus.projects.push({
+                            icon: 'image/gitlab.png',
                             title: project.name,
                             description: gitlabStatus.selected.name,
                             web_url: GitlabHost + '/' + gitlabStatus.selected.path + '/' + project.path,
