@@ -151,6 +151,7 @@ const gitlab = {
                 step = 'project';
                 selected = item.data;
 
+                loadProjectData(item.data.id)
                 utools.setSubInputValue('');
                 callbackSetList(list);
                 utools.subInputFocus();
