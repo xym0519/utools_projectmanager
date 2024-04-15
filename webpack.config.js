@@ -10,7 +10,7 @@ module.exports = [
             __dirname: false
         },
         entry: {
-            main: './index.js'
+            main: './src/index.js'
         },
         output: {
             path: outputPath,
