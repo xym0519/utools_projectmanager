@@ -20,6 +20,14 @@
       ]
     },
     {
+      "icon": "image/redmine.png",
+      "code": "clearredminecache",
+      "explain": "清空Redmine缓存",
+      "cmds": [
+        "ClearRedmineCache"
+      ]
+    },
+    {
       "icon": "image/jenkins.png",
       "code": "jenkins",
       "explain": "Jenkins服务",
@@ -37,6 +45,14 @@
       ]
     },
     {
+      "icon": "image/jenkins.png",
+      "code": "clearjenkinscache",
+      "explain": "清空Jenkins缓存",
+      "cmds": [
+        "ClearJenkinsCache"
+      ]
+    },
+    {
       "icon": "image/gitlab.png",
       "code": "gitlab",
       "explain": "Gitlab服务",
@@ -51,6 +67,14 @@
       "explain": "Gitlab设置",
       "cmds": [
         "GitlabSetting"
+      ]
+    },
+    {
+      "icon": "image/gitlab.png",
+      "code": "cleargitlabcache",
+      "explain": "清空Gitlab缓存",
+      "cmds": [
+        "ClearGitlabCache"
       ]
     }
   ]

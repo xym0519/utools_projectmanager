@@ -153,7 +153,7 @@ const gitlab = {
 
                 loadProjectData(item.data.id)
                 utools.setSubInputValue('');
-                callbackSetList(list);
+                callbackSetList({});
                 utools.subInputFocus();
             } else if (step === 'project') {
                 open(item)
