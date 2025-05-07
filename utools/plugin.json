@@ -101,6 +101,31 @@
       "cmds": [
         "ClearGitlabCache"
       ]
+    },
+    {
+      "icon": "image/forgejo.png",
+      "code": "forgejo",
+      "explain": "ForgeJO服务",
+      "cmds": [
+        "ForgeJO",
+        "G"
+      ]
+    },
+    {
+      "icon": "image/forgejo.png",
+      "code": "forgejosetting",
+      "explain": "ForgeJO设置",
+      "cmds": [
+        "ForgeJOSetting"
+      ]
+    },
+    {
+      "icon": "image/forgejo.png",
+      "code": "clearforgejocache",
+      "explain": "清空ForgeJO缓存",
+      "cmds": [
+        "ClearForgeJOCache"
+      ]
     }
   ]
 }
