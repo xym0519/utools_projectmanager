@@ -53,6 +53,31 @@
       ]
     },
     {
+      "icon": "image/jenkins.png",
+      "code": "jenkins2",
+      "explain": "Jenkins2服务",
+      "cmds": [
+        "Jenkins2",
+        "J2"
+      ]
+    },
+    {
+      "icon": "image/jenkins.png",
+      "code": "jenkinssetting2",
+      "explain": "Jenkins2设置",
+      "cmds": [
+        "JenkinsSetting2"
+      ]
+    },
+    {
+      "icon": "image/jenkins.png",
+      "code": "clearjenkinscache2",
+      "explain": "清空Jenkins2缓存",
+      "cmds": [
+        "ClearJenkinsCache2"
+      ]
+    },
+    {
       "icon": "image/gitlab.png",
       "code": "gitlab",
       "explain": "Gitlab服务",
